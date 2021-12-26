@@ -1,1 +1,3 @@
 # rust
+
+just learning rust
