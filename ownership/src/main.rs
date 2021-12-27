@@ -3,14 +3,14 @@ fn main() {
     ownership_inplace_test_function(string);
     println!("{}", string);
 }
-
+#[allow(dead_code)]
 fn ownership_function_int(mut number: i32) {
     number = number + 2;
     number = number.pow(2);
     println!("{}", number);
 }
-
-fn ownership_function_string(mut text: &str) -> String {
+#[allow(dead_code)]
+fn ownership_function_string(text: &str) -> String {
     let new_text =  text.to_string().replace("world", "Rust");
     return new_text.to_string();
 }
