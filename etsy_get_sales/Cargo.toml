@@ -1,5 +1,5 @@
 [package]
-name = "etsy-web-scraper"
+name = "etsy_get_sales"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 reqwest = { version = "0.11", features = ["blocking","json"] }
 tokio = { version = "1", features = ["full"] }
-soup = "0.5"
+scraper = "0.12.0"
+calamine = "0.18.0"
