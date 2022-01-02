@@ -1,9 +1,13 @@
+use std::io::Empty;
+
+use umya_spreadsheet;
 use reqwest;
 use scraper::{Html, Selector};
-use calamine::{open_workbook, Error, Xlsx, Reader, RangeDeserializerBuilder, DeError, DataType, RangeDeserializer};
 fn main() {
-    
-    println!("{}",get_sales("https://www.etsy.com/shop/DigitalBoutiqueFinds"));
+    println!(
+        "{}",
+        get_sales("https://www.etsy.com/shop/DigitalBoutiqueFinds")
+    );
     get_links();
 }
 
@@ -22,13 +26,20 @@ fn get_sales(link: &str) -> String {
     return sales;
 }
 
-fn get_links(){
-    // let path = format!("{}\\2.xlsx", std::env::current_dir().unwrap().to_str().unwrap());
-    // // println!("{}", path);
-    // let mut workbook: Xlsx<_> = open_workbook(path).expect("Failed to open workbook");
+fn get_links() {
+    let links: Vec<&str> = Vec::new();
+    let path_str = format!(
+        "{}\\2.xlsx",
+        std::env::current_dir().unwrap().to_str().unwrap()
+    );
+    let path = std::path::Path::new(&path_str);
+    // println!("{}", path);
+    let mut workbook = umya_spreadsheet::reader::xlsx::read(&path).unwrap();
+
+    println!("{:?}", workbook.get_sheet_by_name("Sayfa1").unwrap().get_cell_value_by_column_and_row(1, 5).get_value());
 
     // let sheet_name= workbook.sheet_names()[0].clone();
-    
+
     // let range = workbook.worksheet_range(&sheet_name).unwrap().expect("Failed to get range");
 
     // println!("{:?}", workbook);
