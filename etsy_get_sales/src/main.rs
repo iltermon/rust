@@ -1,8 +1,8 @@
 use std::io::Empty;
 
-use umya_spreadsheet;
 use reqwest;
 use scraper::{Html, Selector};
+use umya_spreadsheet::{self, helper::coordinate::column_index_from_string};
 fn main() {
     println!(
         "{}",
@@ -11,6 +11,9 @@ fn main() {
     get_links();
 }
 
+fn to_unsinged(i: usize) -> u32 {
+    return i.to_string().parse::<u32>().unwrap();
+}
 fn get_sales(link: &str) -> String {
     let response = reqwest::blocking::get(link).expect("Failed to get response");
     let html = Html::parse_document(&response.text().unwrap());
@@ -34,10 +37,40 @@ fn get_links() {
     );
     let path = std::path::Path::new(&path_str);
     // println!("{}", path);
-    let mut workbook = umya_spreadsheet::reader::xlsx::read(&path).unwrap();
+    let workbook = umya_spreadsheet::reader::xlsx::read(&path).unwrap();
+    let sheet = workbook.get_sheet_by_name("Sayfa1").unwrap();
+    let mut started = false;
+    let mut i = 0;
+    while true {
+        if sheet
+            .get_cell_value_by_column_and_row(1, to_unsinged(i))
+            .get_value()
+            == ""
+        {
+            started = false;
+        } else if sheet
+            .get_cell_value_by_column_and_row(1, to_unsinged(i))
+            .get_value()
+            != ""
+        {
+            started = true
+        } else if started
+            && sheet
+                .get_cell_value_by_column_and_row(1, to_unsinged(i))
+                .get_value()
+                == ""
+        {
+            break;
+        }
 
-    println!("{:?}", workbook.get_sheet_by_name("Sayfa1").unwrap().get_cell_value_by_column_and_row(1, 5).get_value());
-
+        println!(
+            "{}",
+            sheet
+                .get_cell_value_by_column_and_row(1, to_unsinged(i))
+                .get_value()
+        );
+        i = i + 1;
+    }
     // let sheet_name= workbook.sheet_names()[0].clone();
 
     // let range = workbook.worksheet_range(&sheet_name).unwrap().expect("Failed to get range");
