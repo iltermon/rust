@@ -5,3 +5,4 @@ Cargo.lock
 *.xlsx
 movie_guide/src/secrets.rs
 movie_guide/src/excel.txt
+__pycache__

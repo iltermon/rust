@@ -1,24 +1,23 @@
+use chrono;
+use regex::Regex;
 use reqwest;
 use scraper::{Html, Selector};
 use umya_spreadsheet::{self, Worksheet};
 fn main() {
-    let path_str = format!(
-        "{}\\2.xlsx",
-        std::env::current_dir().unwrap().to_str().unwrap()
-    );
+    println!("1");
+    let current_dir = std::env::current_dir().unwrap();
+    let mut path_str = current_dir.clone();
+    path_str.push("2.xlsx");
+    println!("{:?}", chrono::offset::Local::now());
     let path = std::path::Path::new(&path_str);
-
     let workbook = umya_spreadsheet::reader::xlsx::read(&path).unwrap();
-    let sheet = workbook.get_sheet_by_name("Sayfa1").unwrap();
-    println!(
-        "{}",
-        get_sales("https://www.etsy.com/shop/DigitalBoutiqueFinds")
-    );
-    for i in 0..get_links_with_names(sheet)[0].len() {
-        println!("{}", get_links_with_names(sheet)[0][i]);
-        println!("{}", get_links_with_names(sheet)[1][i]);
-        break;
+    let sheet = workbook.get_sheet_by_sheet_id("1").unwrap();
+    let links_with_names = get_links_with_names(sheet);
+    for i in 0..links_with_names[0].len() {
+        println!("{}", get_sales(&links_with_names[0][i]));
+        println!("{}", links_with_names[1][i]);
     }
+    println!("{:?}", chrono::offset::Local::now());
 }
 
 fn to_unsinged(i: usize) -> u32 {
@@ -27,7 +26,8 @@ fn to_unsinged(i: usize) -> u32 {
 fn get_sales(link: &str) -> String {
     let response = reqwest::blocking::get(link).expect("Failed to get response");
     let html = Html::parse_document(&response.text().unwrap());
-    let selector = Selector::parse(r#"a[rel="nofollow"]"#).unwrap();
+    let selector = Selector::parse(r#"span[class="wt-text-caption wt-no-wrap"]"#).unwrap();
+
     let sales = html
         .select(&selector)
         .next()
@@ -36,7 +36,11 @@ fn get_sales(link: &str) -> String {
         .replace(",", "")
         .to_lowercase()
         .replace(" sales", "");
-    return sales;
+
+    return Regex::new(r"(<.*?>)")
+        .unwrap()
+        .replace_all(&sales, "")
+        .to_string();
 }
 
 fn get_links_with_names(sheet: &Worksheet) -> Vec<Vec<String>> {
@@ -80,9 +84,11 @@ fn get_links_with_names(sheet: &Worksheet) -> Vec<Vec<String>> {
                 .get_value()
                 .to_string(),
         );
-        links_with_names.push(links.clone());
-        links_with_names.push(names.clone());
+
         i += 1;
     }
+    links_with_names.push(links.clone());
+    links_with_names.push(names.clone());
+
     return links_with_names;
 }
